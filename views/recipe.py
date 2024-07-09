@@ -3,6 +3,8 @@ from flask_login import current_user, login_required
 from app import app, db
 from models.recipe import Recipe
 from forms.recipe_form import RecipeForm
+from flask import request
+from forms.search_form import SearchForm
 
 @recipe.route('/recipe/new', methods=['GET', 'POST'])
 @login_required
@@ -51,3 +53,14 @@ def delete_recipe(recipe_id):
     db.session.commit()
     flash('Your recipe has been deleted!')
     return redirect(url_for('index'))
+
+
+
+@recipe.route('/recipes')
+def list_recipes():
+    form = SearchForm()
+    query = Recipe.query
+    if form.validate_on_submit():
+        query = query.filter(Recipe.title.contains(form.search.data))
+    recipes = query.all()
+    return render_template('list_recipes.html', recipes=recipes, form=form
