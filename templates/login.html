@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<form method="POST" action="{{ url_for('auth.login') }}">
+    {{ form.hidden_tag() }}
+    <div class="form-group">
+        {{ form.username.label }} {{ form.username(class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.password.label }} {{ form.password(class="form-control") }}
+    </div>
+    <div class="form-group">
+        {{ form.remember_me }} {{ form.remember_me.label }}
+    </div>
+    <div class="form-group">
+        {{ form.submit(class="btn btn-primary") }}
+    </div>
+</form>
+{% endblock %}
