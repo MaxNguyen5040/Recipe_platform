@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top Rated Recipes</title>
+</head>
+<body>
+    <h1>Top Rated Recipes</h1>
+    <ul>
+        {% for recipe in recipes %}
+        <li>{{ recipe.title }} - {{ sum(rt.rating for rt in recipe.ratings) / len(recipe.ratings) if recipe.ratings else 0 }}</li>
+        {% endfor %}
+    </ul>
+    <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+</body>
+</html>

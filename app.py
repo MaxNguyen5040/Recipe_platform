@@ -204,3 +204,38 @@ def add_recipe():
         return redirect(url_for('dashboard'))
     return render_template('add_recipe.html', categories=categories)
  
+@app.route('/top_rated')
+def top_rated():
+    recipes = Recipe.query.all()
+    recipes = sorted(recipes, key=lambda r: sum(rt.rating for rt in r.ratings) / len(r.ratings) if r.ratings else 0, reverse=True)
+    return render_template('top_rated.html', recipes=recipes)
+
+@app.route('/add_tag', methods=['GET', 'POST'])
+def add_tag():
+    if request.method == 'POST':
+        name = request.form['name']
+        new_tag = Tag(name=name)
+        db.session.add(new_tag)
+        db.session.commit()
+        return redirect(url_for('dashboard'))
+    return render_template('add_tag.html')
+
+@app.route('/add_recipe', methods=['GET', 'POST'])
+def add_recipe():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    categories = Category.query.all()
+    tags = Tag.query.all()
+    if request.method == 'POST':
+        title = request.form['title']
+        ingredients = request.form['ingredients']
+        instructions = request.form['instructions']
+        category_id = request.form['category_id']
+        tag_ids = request.form.getlist('tag_ids')
+        user_id = session['user_id']
+        new_recipe = Recipe(title=title, ingredients=ingredients, instructions=instructions, user_id=user_id, category_id=category_id)
+        new_recipe.tags = Tag.query.filter(Tag.id.in_(tag_ids)).all()
+        db.session.add(new_recipe)
+        db.session.commit()
+        return redirect(url_for('dashboard'))
+    return render_template('add_recipe.html', categories=categories, tags=tags)
