@@ -232,10 +232,29 @@ def add_recipe():
         instructions = request.form['instructions']
         category_id = request.form['category_id']
         tag_ids = request.form.getlist('tag_ids')
+        image_file = save_picture(request.files['image_file'])
         user_id = session['user_id']
-        new_recipe = Recipe(title=title, ingredients=ingredients, instructions=instructions, user_id=user_id, category_id=category_id)
+        new_recipe = Recipe(
+            title=title,
+            ingredients=ingredients,
+            instructions=instructions,
+            user_id=user_id,
+            category_id=category_id,
+            image_file=image_file
+        )
         new_recipe.tags = Tag.query.filter(Tag.id.in_(tag_ids)).all()
         db.session.add(new_recipe)
         db.session.commit()
         return redirect(url_for('dashboard'))
     return render_template('add_recipe.html', categories=categories, tags=tags)
+
+def save_picture(form_picture):
+    random_hex = secrets.token_hex(8)
+    _, f_ext = os.path.splitext(form_picture.filename)
+    picture_fn = random_hex + f_ext
+    picture_path = os.path.join(app.root_path, 'static/recipe_pics', picture_fn)
+    output_size = (500, 500)
+    i = Image.open(form_picture)
+    i.thumbnail(output_size)
+    i.save(picture_path)
+    return picture_fn

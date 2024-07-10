@@ -25,10 +25,10 @@
         <li><a href="{{ url_for('category', category_id=category.id) }}">{{ category.name }}</a></li>
         {% endfor %}
     </ul>
-    <h2>Top Rated Recipes</h2>
+    <h2>Tags</h2>
     <ul>
-        {% for recipe in top_rated_recipes %}
-        <li>{{ recipe.title }} - {{ sum(rt.rating for rt in recipe.ratings) / len(recipe.ratings) if recipe.ratings else 0 }}</li>
+        {% for tag in tags %}
+        <li><a href="{{ url_for('tag', tag_id=tag.id) }}">{{ tag.name }}</a></li>
         {% endfor %}
     </ul>
 </body>
