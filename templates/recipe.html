@@ -17,6 +17,9 @@
         <input type="number" name="rating" min="1" max="5" required>
         <button type="submit">Submit Rating</button>
     </form>
+    <form action="{{ url_for('add_favorite', recipe_id=recipe.id) }}" method="POST">
+        <button type="submit">Add to Favorites</button>
+    </form>
     <h2>Comments</h2>
     <ul>
         {% for comment in recipe.comments %}

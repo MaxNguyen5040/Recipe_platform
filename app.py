@@ -132,3 +132,37 @@ def add_comment(recipe_id):
     db.session.commit()
     return redirect(url_for('recipe', recipe_id=recipe_id))
 
+@app.route('/change_password', methods=['GET', 'POST'])
+def change_password():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    if request.method == 'POST':
+        old_password = request.form['old_password']
+        new_password = request.form['new_password']
+        user = User.query.get(session['user_id'])
+        if user.check_password(old_password):
+            user.set_password(new_password)
+            db.session.commit()
+            return redirect(url_for('profile'))
+        else:
+            return "Incorrect old password."
+    return render_template('change_password.html')
+
+@app.route('/add_favorite/<int:recipe_id>', methods=['POST'])
+def add_favorite(recipe_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    user_id = session['user_id']
+    favorite = Favorite(user_id=user_id, recipe_id=recipe_id)
+    db.session.add(favorite)
+    db.session.commit()
+    return redirect(url_for('recipe', recipe_id=recipe_id))
+
+@app.route('/favorites')
+def favorites():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    user_id = session['user_id']
+    favorites = Favorite.query.filter_by(user_id=user_id).all()
+    favorite_recipes = [f.recipe for f in favorites]
+    return render_template('favorites.html', recipes=favorite_recipes)
