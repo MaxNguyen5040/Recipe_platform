@@ -8,5 +8,16 @@
 <body>
     <h1>Welcome to your dashboard!</h1>
     <a href="{{ url_for('logout') }}">Logout</a>
+    <h2>Your Recipes</h2>
+    <ul>
+        {% for recipe in recipes %}
+        <li>{{ recipe.title }}
+            <a href="{{ url_for('edit_recipe', recipe_id=recipe.id) }}">Edit</a>
+            <form action="{{ url_for('delete_recipe', recipe_id=recipe.id) }}" method="POST" style="display:inline;">
+                <button type="submit">Delete</button>
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
 </body>
 </html>
