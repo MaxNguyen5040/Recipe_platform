@@ -166,3 +166,41 @@ def favorites():
     favorites = Favorite.query.filter_by(user_id=user_id).all()
     favorite_recipes = [f.recipe for f in favorites]
     return render_template('favorites.html', recipes=favorite_recipes)
+
+@app.route('/share_recipe/<int:recipe_id>', methods=['POST'])
+def share_recipe(recipe_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    email = request.form['email']
+    recipe = Recipe.query.get_or_404(recipe_id)
+    # Implement email sending logic here
+    send_email(email, f"Check out this recipe: {recipe.title}", f"Ingredients: {recipe.ingredients}\nInstructions: {recipe.instructions}")
+    return redirect(url_for('recipe', recipe_id=recipe_id))
+
+@app.route('/add_category', methods=['GET', 'POST'])
+def add_category():
+    if request.method == 'POST':
+        name = request.form['name']
+        new_category = Category(name=name)
+        db.session.add(new_category)
+        db.session.commit()
+        return redirect(url_for('dashboard'))
+    return render_template('add_category.html')
+
+@app.route('/add_recipe', methods=['GET', 'POST'])
+def add_recipe():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    categories = Category.query.all()
+    if request.method == 'POST':
+        title = request.form['title']
+        ingredients = request.form['ingredients']
+        instructions = request.form['instructions']
+        category_id = request.form['category_id']
+        user_id = session['user_id']
+        new_recipe = Recipe(title=title, ingredients=ingredients, instructions=instructions, user_id=user_id, category_id=category_id)
+        db.session.add(new_recipe)
+        db.session.commit()
+        return redirect(url_for('dashboard'))
+    return render_template('add_recipe.html', categories=categories)
+ 

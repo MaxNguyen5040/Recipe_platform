@@ -20,6 +20,11 @@
     <form action="{{ url_for('add_favorite', recipe_id=recipe.id) }}" method="POST">
         <button type="submit">Add to Favorites</button>
     </form>
+    <form action="{{ url_for('share_recipe', recipe_id=recipe.id) }}" method="POST">
+        <label for="email">Share with a friend:</label>
+        <input type="email" name="email" required>
+        <button type="submit">Share</button>
+    </form>
     <h2>Comments</h2>
     <ul>
         {% for comment in recipe.comments %}
