@@ -258,3 +258,13 @@ def save_picture(form_picture):
     i.thumbnail(output_size)
     i.save(picture_path)
     return picture_fn
+
+@app.route('/rate_recipe/<int:recipe_id>', methods=['POST'])
+def rate_recipe(recipe_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    rating_value = request.form['rating']
+    rating = Rating(rating=rating_value, user_id=session['user_id'], recipe_id=recipe_id)
+    db.session.add(rating)
+    db.session.commit()
+    return redirect(url_for('recipe', recipe_id=recipe_id))
