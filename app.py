@@ -114,3 +114,21 @@ def submit_recipe():
         db.session.commit()
         return redirect(url_for('dashboard'))
     return render_template('submit_recipe.html')
+
+@app.route('/search', methods=['GET'])
+def search():
+    query = request.args.get('query')
+    results = Recipe.query.filter(Recipe.title.contains(query) | Recipe.ingredients.contains(query)).all()
+    return render_template('search_results.html', results=results, query=query)
+
+@app.route('/add_comment/<int:recipe_id>', methods=['POST'])
+def add_comment(recipe_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    content = request.form['content']
+    user_id = session['user_id']
+    new_comment = Comment(content=content, user_id=user_id, recipe_id=recipe_id)
+    db.session.add(new_comment)
+    db.session.commit()
+    return redirect(url_for('recipe', recipe_id=recipe_id))
+
