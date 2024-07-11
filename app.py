@@ -9,8 +9,14 @@ db = SQLAlchemy(app)
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(80), unique=True, nullable=False)
-    password = db.Column(db.String(200), nullable=False)
+    username = db.Column(db.String(100), nullable=False, unique=True)
+    email = db.Column(db.String(120), nullable=False, unique=True)
+    password = db.Column(db.String(60), nullable=False)
+    recipes = db.relationship('Recipe', backref='author', lazy=True)
+    bio = db.Column(db.Text, nullable=True)
+    profile_picture = db.Column(db.String(20), nullable=False, default='default.jpg')
+    favorite_recipes = db.relationship('Recipe', secondary=favorites, backref=db.backref('favorited_by', lazy='dynamic'))
+
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -52,10 +58,14 @@ if __name__ == "__main__":
 
 class Recipe(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    title = db.Column(db.String(150), nullable=False)
+    title = db.Column(db.String(100), nullable=False)
     ingredients = db.Column(db.Text, nullable=False)
     instructions = db.Column(db.Text, nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=True)
+    image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
+    ratings = db.relationship('Rating', backref='recipe', lazy=True)
+    comments = db.relationship('Comment', backref='recipe', lazy=True)
 
 @app.route('/edit_recipe/<int:recipe_id>', methods=['GET', 'POST'])
 def edit_recipe(recipe_id):
@@ -158,14 +168,25 @@ def add_favorite(recipe_id):
     db.session.commit()
     return redirect(url_for('recipe', recipe_id=recipe_id))
 
+@app.route('/favorite_recipe/<int:recipe_id>', methods=['POST'])
+def favorite_recipe(recipe_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    user = User.query.get(session['user_id'])
+    recipe = Recipe.query.get(recipe_id)
+    if recipe in user.favorite_recipes:
+        user.favorite_recipes.remove(recipe)
+    else:
+        user.favorite_recipes.append(recipe)
+    db.session.commit()
+    return redirect(url_for('recipe', recipe_id=recipe_id))
+
 @app.route('/favorites')
 def favorites():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    user_id = session['user_id']
-    favorites = Favorite.query.filter_by(user_id=user_id).all()
-    favorite_recipes = [f.recipe for f in favorites]
-    return render_template('favorites.html', recipes=favorite_recipes)
+    user = User.query.get(session['user_id'])
+    return render_template('favorites.html', recipes=user.favorite_recipes)
 
 @app.route('/share_recipe/<int:recipe_id>', methods=['POST'])
 def share_recipe(recipe_id):
@@ -268,3 +289,9 @@ def rate_recipe(recipe_id):
     db.session.add(rating)
     db.session.commit()
     return redirect(url_for('recipe', recipe_id=recipe_id))
+
+favorites = db.Table('favorites',
+    db.Column('user_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('recipe_id', db.Integer, db.ForeignKey('recipe.id'))
+)
+

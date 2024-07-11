@@ -7,33 +7,38 @@
 </head>
 <body>
     <h1>{{ recipe.title }}</h1>
-    <p><strong>Ingredients:</strong></p>
-    <p>{{ recipe.ingredients }}</p>
-    <p><strong>Instructions:</strong></p>
-    <p>{{ recipe.instructions }}</p>
-    <p><strong>Average Rating:</strong> {{ average_rating }}</p>
+    <img src="{{ url_for('static', filename='recipe_pics/' + recipe.image_file) }}" alt="Recipe Image">
+    <p><strong>Category:</strong> {{ recipe.category.name }}</p>
+    <p><strong>Ingredients:</strong> {{ recipe.ingredients }}</p>
+    <p><strong>Instructions:</strong> {{ recipe.instructions }}</p>
     <form action="{{ url_for('rate_recipe', recipe_id=recipe.id) }}" method="POST">
         <label for="rating">Rate this recipe:</label>
-        <input type="number" name="rating" min="1" max="5" required>
-        <button type="submit">Submit Rating</button>
+        <select name="rating" required>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+        </select>
+        <button type="submit">Rate</button>
     </form>
-    <form action="{{ url_for('add_favorite', recipe_id=recipe.id) }}" method="POST">
-        <button type="submit">Add to Favorites</button>
-    </form>
-    <form action="{{ url_for('share_recipe', recipe_id=recipe.id) }}" method="POST">
-        <label for="email">Share with a friend:</label>
-        <input type="email" name="email" required>
-        <button type="submit">Share</button>
+    <p><strong>Average Rating:</strong> {{ recipe.avg_rating }}</p>
+    <form action="{{ url_for('add_comment', recipe_id=recipe.id) }}" method="POST">
+        <label for="content">Add a comment:</label>
+        <textarea name="content" required></textarea>
+        <button type="submit">Comment</button>
     </form>
     <h2>Comments</h2>
     <ul>
         {% for comment in recipe.comments %}
-        <li>{{ comment.content }} - {{ comment.timestamp }}</li>
+        <li>{{ comment.content }} - {{ comment.author.username }}</li>
         {% endfor %}
     </ul>
-    <form action="{{ url_for('add_comment', recipe_id=recipe.id) }}" method="POST">
-        <textarea name="content" required></textarea>
-        <button type="submit">Add Comment</button>
+    <h2>Share this Recipe</h2>
+    <form action="{{ url_for('share_recipe', recipe_id=recipe.id) }}" method="POST">
+        <label for="email">Recipient's Email:</label>
+        <input type="email" name="email" required>
+        <button type="submit">Share</button>
     </form>
     <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
 </body>
