@@ -1,21 +1,27 @@
-{% extends "base.html" %}
-
-{% block title %}Manage Categories{% endblock %}
-
-{% block content %}
-<h2>Manage Categories</h2>
-<form method="POST" action="{{ url_for('category.manage_categories') }}">
-    {{ form.hidden_tag() }}
-    <div class="form-group">
-        {{ form.name.label }} {{ form.name(class="form-control") }}
-    </div>
-    <div class="form-group">
-        {{ form.submit(class="btn btn-primary") }}
-    </div>
-</form>
-<ul>
-    {% for category in categories %}
-    <li>{{ category.name }}</li>
-    {% endfor %}
-</ul>
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Categories</title>
+</head>
+<body>
+    <h1>Manage Categories</h1>
+    <form action="{{ url_for('manage_categories') }}" method="POST">
+        <label for="name">Category Name:</label>
+        <input type="text" name="name" required>
+        <button type="submit">Add Category</button>
+    </form>
+    <h2>Existing Categories</h2>
+    <ul>
+        {% for category in categories %}
+        <li>{{ category.name }}
+            <form action="{{ url_for('delete_category', category_id=category.id) }}" method="POST" style="display:inline;">
+                <button type="submit">Delete</button>
+            </form>
+        </li>
+        {% endfor %}
+    </ul>
+    <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+</body>
+</html>

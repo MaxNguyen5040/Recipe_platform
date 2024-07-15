@@ -295,3 +295,61 @@ favorites = db.Table('favorites',
     db.Column('recipe_id', db.Integer, db.ForeignKey('recipe.id'))
 )
 
+@app.route('/manage_categories', methods=['GET', 'POST'])
+def manage_categories():
+    if 'user_id' not in session or not current_user.is_admin:
+        return redirect(url_for('login'))
+    if request.method == 'POST':
+        name = request.form['name']
+        category = Category(name=name)
+        db.session.add(category)
+        db.session.commit()
+        return redirect(url_for('manage_categories'))
+    categories = Category.query.all()
+    return render_template('manage_categories.html', categories=categories)
+
+@app.route('/delete_category/<int:category_id>', methods=['POST'])
+def delete_category(category_id):
+    if 'user_id' not in session or not current_user.is_admin:
+        return redirect(url_for('login'))
+    category = Category.query.get_or_404(category_id)
+    db.session.delete(category)
+    db.session.commit()
+    return redirect(url_for('manage_categories'))
+
+@app.route('/manage_tags', methods=['GET', 'POST'])
+def manage_tags():
+    if 'user_id' not in session or not current_user.is_admin:
+        return redirect(url_for('login'))
+    if request.method == 'POST':
+        name = request.form['name']
+        tag = Tag(name=name)
+        db.session.add(tag)
+        db.session.commit()
+        return redirect(url_for('manage_tags'))
+    tags = Tag.query.all()
+    return render_template('manage_tags.html', tags=tags)
+
+@app.route('/delete_tag/<int:tag_id>', methods=['POST'])
+def delete_tag(tag_id):
+    if 'user_id' not in session or not current_user.is_admin:
+        return redirect(url_for('login'))
+    tag = Tag.query.get_or_404(tag_id)
+    db.session.delete(tag)
+    db.session.commit()
+    return redirect(url_for('manage_tags'))
+
+@app.route('/add_tag_to_recipe/<int:recipe_id>', methods=['POST'])
+def add_tag_to_recipe(recipe_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    tag_name = request.form['tag']
+    tag = Tag.query.filter_by(name=tag_name).first()
+    if not tag:
+        tag = Tag(name=tag_name)
+        db.session.add(tag)
+    recipe = Recipe.query.get(recipe_id)
+    if tag not in recipe.tags:
+        recipe.tags.append(tag)
+    db.session.commit()
+    return redirect(url_for('recipe', recipe_id=recipe_id))
