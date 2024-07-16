@@ -15,9 +15,28 @@ class Recipe(db.Model):
         if self.ratings:
             return sum(r.rating for r in self.ratings) / len(self.ratings)
         return 0
+    
+    def set_difficulty(self, difficulty):
+        if difficulty in difficulties:
+            self.difficulty = difficulties[difficulty]
+        else:
+            print("Invalid difficulty level")
 
 # Association table for many-to-many relationship
 recipe_tags = db.Table('recipe_tags',
     db.Column('recipe_id', db.Integer, db.ForeignKey('recipe.id'), primary_key=True),
     db.Column('tag_id', db.Integer, db.ForeignKey('tag.id'), primary_key=True)
 )
+
+class RecipeDifficulty:
+    def __init__(self, level, description, skill_required):
+        self.level = level
+        self.description = description
+        self.skill_required = skill_required
+
+difficulties = {
+    'Easy': RecipeDifficulty('Easy', 'Suitable for beginners.', 1),
+    'Medium': RecipeDifficulty('Medium', 'Requires some cooking experience.', 2),
+    'Hard': RecipeDifficulty('Hard', 'Challenging recipes for experienced cooks.', 3),
+    'Expert': RecipeDifficulty('Expert', 'Complex recipes for experts.', 4)
+}
