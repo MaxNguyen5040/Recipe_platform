@@ -1,24 +1,15 @@
-def search_recipes(query, filters):
-    recipes = get_all_recipes()
-    if 'category' in filters:
-        recipes = filter_by_category(recipes, filters['category'])
-    if 'min_rating' in filters:
-        recipes = filter_by_rating(recipes, filters['min_rating'])
-    if 'tags' in filters:
-        recipes = filter_by_tags(recipes, filters['tags'])
-    return recipes
+class RecipeSearch:
+    def __init__(self, recipes):
+        self.recipes = recipes
 
-def filter_by_category(recipes, category):
-    return [recipe for recipe in recipes if recipe['category'] == category]
+    def search_by_ingredient(self, ingredient):
+        return [recipe for recipe in self.recipes if ingredient in recipe.ingredients]
 
-def filter_by_rating(recipes, min_rating):
-    return [recipe for recipe in recipes if recipe['rating'] >= min_rating]
+    def filter_by_cuisine(self, cuisine):
+        return [recipe for recipe in self.recipes if recipe.cuisine == cuisine]
 
-def filter_by_tags(recipes, tags):
-    return [recipe for recipe in recipes if set(tags).intersection(recipe['tags'])]
+# main.py
 
-def get_all_recipes():
-    return [
-        {'title': 'Recipe 1', 'category': 'Dessert', 'rating': 4, 'tags': ['chocolate', 'easy']},
-        {'title': 'Recipe 2', 'category': 'Main', 'rating': 5, 'tags': ['vegan', 'quick']}
-    ]
+recipe_search = RecipeSearch(recipe_manager.get_all_recipes())
+recipes_with_tomato = recipe_search.search_by_ingredient("Tomato")
+italian_recipes = recipe_search.filter_by_cuisine("Italian")

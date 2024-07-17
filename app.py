@@ -353,3 +353,28 @@ def add_tag_to_recipe(recipe_id):
         recipe.tags.append(tag)
     db.session.commit()
     return redirect(url_for('recipe', recipe_id=recipe_id))
+
+@app.route('/recipes', methods=['GET'])
+def get_recipes():
+    difficulty = request.args.get('difficulty')
+    if difficulty:
+        recipes = recipe_manager.get_recipes_by_difficulty(difficulty)
+    else:
+        recipes = recipe_manager.get_all_recipes()
+    return jsonify([recipe.to_dict() for recipe in recipes])
+
+@app.route('/user/skill', methods=['GET', 'POST'])
+def user_skill():
+    if request.method == 'POST':
+        new_skill_level = request.json.get('skill_level')
+        current_user.update_skill_level(new_skill_level)
+        return jsonify({"message": "Skill level updated"}), 200
+    return jsonify({"skill_level": current_user.skill_level})
+
+@app.route('/user/achievements', methods=['GET', 'POST'])
+def user_achievements():
+    if request.method == 'POST':
+        new_achievement = request.json.get('achievement')
+        current_user.add_achievement(new_achievement)
+        return jsonify({"message": "Achievement added"}), 200
+    return jsonify([achievement.to_dict() for achievement in current_user.achievements])
